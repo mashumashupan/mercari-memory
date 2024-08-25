@@ -1,11 +1,21 @@
 package main
 
 import (
+	"context"
+	"database/sql"
+	"encoding/base64"
+	"fmt"
 	"os"
 
 	"github.com/gin-gonic/gin"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
+
+	openai "github.com/sashabaranov/go-openai"
+
+	_ "github.com/mashumashupan/mercarius_clone/docs" // docs をインポートして Swag のドキュメントを読み込む
+	swaggerFiles "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
 )
 
 // データベース用
@@ -25,37 +35,215 @@ type ProductsJson struct {
 
 var db *gorm.DB
 
-func main() {
+// 最初に送るメッセージ
+var systemMessage = openai.ChatCompletionMessage{
+	Role: openai.ChatMessageRoleSystem,
+	Content: `フリマアプリの出品文章を物語性ある感じで書いてくれるチャットボットを作りたい．
+		対話定式で，「購入時何が良いと思ったのか」「その物にまつわるエピソード」「なぜ手放すのか（ネガティブな返答が来たらポジションに変換）」などの質問をして，魅力的な商品紹介を作るサービスです。
+		出品のフローを試したい。質問を考えた上で1つずつ提示して。その後こちらが答えるので、いくつかのやり取りの後、こちらの回答を踏まえて商品説明となる物語感ある文章を作成して。まずは商品画像が送られてきます。その後質問をしてください。`,
+}
 
+// セッション毎にやり取りを保存するMap
+// TODO: 本来はキャッシュサーバーなどに保存する
+var chatMap = map[string][]openai.ChatCompletionMessage{}
+
+// ChatGPTのクライアント
+// main関数で初期化
+var client *openai.Client
+
+func main() {
 	dsn := os.Getenv("DSN")
-	database, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
+	dbName := os.Getenv("DB_NAME")
+	dsnParam := os.Getenv("DSN_PARAM")
+	// MySQLに接続
+	database, err := sql.Open("mysql", dsn)
 	if err != nil {
 		panic("データベース接続に失敗しました")
 	}
-	db = database
 
-	db.AutoMigrate(&Products{})
+	// データベースがない場合は作成
+	_, err = database.Exec(fmt.Sprintf("CREATE DATABASE IF NOT EXISTS %s;", dbName))
+	if err != nil {
+		panic("データベース作成に失敗しました")
+	}
+
+	// データベースに接続
+	db, err := gorm.Open(mysql.Open(dsn+dbName+dsnParam), &gorm.Config{})
+	if err != nil {
+		panic("データベース接続に失敗しました")
+	}
+
+	db.AutoMigrate(&Products{}) // テーブル作成
 
 	r := gin.Default()
 
-	r.GET("/api/products", func(c *gin.Context) {
+	// APIキーを読み込む
+	apiKey := os.Getenv("API_KEY")
+	client = openai.NewClient(apiKey) // API key
 
-		// 小説に紐づくエピソードを取得
-		products := []Products{}
-		db.Find(&products)
+	// Swagger のエンドポイントをセットアップ
+	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
-		// JSONに変換
-		productsJson := []ProductsJson{}
-		for _, e := range products {
-			productsJson = append(productsJson, ProductsJson{
-				Name:  e.Name,
-				Price: e.Price,
-				Image: e.Image,
-			})
-		}
+	// 商品一覧取得API
+	r.GET("/api/products", products)
 
-		// JSONを返す
-		c.JSON(200, productsJson)
-	})
+	// 最初の画像送信用チャットAPI
+	r.POST("/api/chat-start", chatStart)
+
+	// チャットAPI
+	r.POST("/api/chat", chat)
+
 	r.Run()
+}
+
+// products godoc
+// @Summary 商品一覧取得API
+// @Description 商品一覧を取得するAPI
+// @ID get-products
+// @Produce json
+// @Success 200 {array} ProductsJson
+// @Router /api/products [get]
+func products(c *gin.Context) {
+
+	// データベースから商品一覧を取得
+	products := []Products{}
+	db.Find(&products)
+
+	// JSONに変換
+	productsJson := []ProductsJson{}
+	for _, e := range products {
+		productsJson = append(productsJson, ProductsJson{
+			Name:  e.Name,
+			Price: e.Price,
+			Image: e.Image,
+		})
+	}
+
+	// JSONを返す
+	c.JSON(200, productsJson)
+}
+
+// chatStart godoc
+// @Summary 最初の画像送信用チャットAPI
+// @Description 最初の画像を送信してチャットを開始するAPI
+// @ID post-chat-start
+// @Accept multipart/form-data
+// @Param session_id formData string true "セッションID"
+// @Param image formData file true "画像データ"
+// @Produce json
+// @Success 200 {string} response
+// @Router /api/chat-start [post]
+func chatStart(c *gin.Context) {
+	sessionId := c.PostForm("session_id") // セッション毎にIDを振る
+
+	// 画像データを受信
+	image, _, _ := c.Request.FormFile("image")
+	imageData := make([]byte, 0)
+	image.Read(imageData)
+
+	// 画像データをBase64に変換
+	base64Image := base64.StdEncoding.EncodeToString(imageData)
+
+	// ChatGPTに画像データとsystemのメッセージを送信するための，メッセージを作成
+	chat := []openai.ChatCompletionMessage{
+		systemMessage,
+		{
+			Role: openai.ChatMessageRoleUser,
+			MultiContent: []openai.ChatMessagePart{
+				{
+					Type: openai.ChatMessagePartTypeImageURL,
+					ImageURL: &openai.ChatMessageImageURL{
+						URL:    base64Image,
+						Detail: openai.ImageURLDetailAuto,
+					},
+				},
+			},
+		},
+	}
+
+	// ChatGPTにメッセージを送信し，返答を取得
+	resp, err := client.CreateChatCompletion(
+		context.Background(),
+		openai.ChatCompletionRequest{
+			Model:    openai.GPT4o,
+			Messages: chat,
+		},
+	)
+
+	if err != nil {
+		text := fmt.Sprintf("ChatCompletion error: %v\n", err)
+		c.JSON(500, gin.H{
+			"error": text,
+		})
+		return
+	}
+
+	// 返答をセッションIDでMapに保存
+	// 返答を追加
+	chat = append(chat, resp.Choices[0].Message)
+	// セッションIDでMapに保存
+	chatMap[sessionId] = chat
+
+	// 返答をクライアントに返す
+	c.JSON(200, gin.H{
+		"response": resp.Choices[0].Message.Content,
+	})
+}
+
+// chat godoc
+// @Summary チャットAPI
+// @Description チャットを行うAPI
+// @ID post-chat
+// @Accept multipart/form-data
+// @Param session_id formData string true "セッションID"
+// @Param chat_message formData string true "チャットメッセージ"
+// @Produce json
+// @Success 200 {string} response
+// @Router /api/chat [post]
+func chat(c *gin.Context) {
+	sessionId := c.PostForm("session_id") // セッション毎にIDを振る
+	message := c.PostForm("chat_message")
+
+	// セッションIDでMapから現在のやり取りのを取得
+	chat, ok := chatMap[sessionId]
+	if !ok {
+		// セッションIDがない場合は初回のため最初のメッセージを作る
+		chat = []openai.ChatCompletionMessage{
+			// システムメッセージ
+			systemMessage,
+		}
+	}
+
+	// クライアントメッセージを追加
+	chat = append(chat, openai.ChatCompletionMessage{
+		Role:    openai.ChatMessageRoleUser,
+		Content: message,
+	})
+
+	// ChatGPTにメッセージを送信し，返答を取得
+	resp, err := client.CreateChatCompletion(
+		context.Background(),
+		openai.ChatCompletionRequest{
+			Model:    openai.GPT4o,
+			Messages: chat,
+		},
+	)
+
+	if err != nil {
+		text := fmt.Sprintf("ChatCompletion error: %v\n", err)
+		c.JSON(500, gin.H{
+			"error": text,
+		})
+		return
+	}
+
+	// 返答を追加
+	chat = append(chat, resp.Choices[0].Message)
+	// セッションIDでMapに保存
+	chatMap[sessionId] = chat
+
+	// 返答をクライアントに返す
+	c.JSON(200, gin.H{
+		"response": resp.Choices[0].Message.Content,
+	})
 }

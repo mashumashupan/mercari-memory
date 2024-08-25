@@ -1,0 +1,78 @@
+definitions:
+  main.ProductsJson:
+    properties:
+      image:
+        type: string
+      name:
+        type: string
+      price:
+        type: number
+    type: object
+info:
+  contact: {}
+paths:
+  /api/chat:
+    post:
+      consumes:
+      - multipart/form-data
+      description: チャットを行うAPI
+      operationId: post-chat
+      parameters:
+      - description: セッションID
+        in: formData
+        name: session_id
+        required: true
+        type: string
+      - description: チャットメッセージ
+        in: formData
+        name: chat_message
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      summary: チャットAPI
+  /api/chat-start:
+    post:
+      consumes:
+      - multipart/form-data
+      description: 最初の画像を送信してチャットを開始するAPI
+      operationId: post-chat-start
+      parameters:
+      - description: セッションID
+        in: formData
+        name: session_id
+        required: true
+        type: string
+      - description: 画像データ
+        in: formData
+        name: image
+        required: true
+        type: file
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      summary: 最初の画像送信用チャットAPI
+  /api/products:
+    get:
+      description: 商品一覧を取得するAPI
+      operationId: get-products
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/main.ProductsJson'
+            type: array
+      summary: 商品一覧取得API
+swagger: "2.0"
