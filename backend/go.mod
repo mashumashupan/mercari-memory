@@ -1,8 +1,9 @@
 module github.com/mashumashupan/mercarius_clone
 
-go 1.18
+go 1.22
 
 require (
+	github.com/aws/aws-sdk-go v1.55.5
 	github.com/gin-gonic/gin v1.10.0
 	github.com/sashabaranov/go-openai v1.28.3
 	github.com/swaggo/files v1.0.1
@@ -33,6 +34,7 @@ require (
 	github.com/goccy/go-json v0.10.2 // indirect
 	github.com/jinzhu/inflection v1.0.0 // indirect
 	github.com/jinzhu/now v1.1.5 // indirect
+	github.com/jmespath/go-jmespath v0.4.0 // indirect
 	github.com/josharian/intern v1.0.0 // indirect
 	github.com/json-iterator/go v1.1.12 // indirect
 	github.com/klauspost/cpuid/v2 v2.2.7 // indirect

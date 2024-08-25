@@ -7,15 +7,8 @@ services:
       - "8080:8080"
     depends_on:
       - mysql
-    environment:
-      - DB_HOST=mysql
-      - DB_PORT=3306
-      - DB_USER=root
-      - DB_PASSWORD=password
-      - DB_NAME=mercarius_db
-      - DSN=root:password@tcp(mysql:3306)/
-      - DSN_PARAM=?parseTime=true&loc=Local&charset=utf8mb4&collation=utf8mb4_unicode_ci
-      - API_KEY=${API_KEY}
+    env_file:
+      - .env
     volumes:
       - .:/app
     working_dir: /app

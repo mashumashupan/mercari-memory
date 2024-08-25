@@ -16,7 +16,13 @@ import (
 	_ "github.com/mashumashupan/mercarius_clone/docs" // docs をインポートして Swag のドキュメントを読み込む
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
+
+	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/aws/session"
+	"github.com/aws/aws-sdk-go/service/ssm"
 )
+
+// @BasePath /v1
 
 // データベース用
 type Products struct {
@@ -51,10 +57,29 @@ var chatMap = map[string][]openai.ChatCompletionMessage{}
 // main関数で初期化
 var client *openai.Client
 
+var isLocal = os.Getenv("IS_LOCAL") == "true"
+var ssmPrefix = "/mercarius/"
+
 func main() {
-	dsn := os.Getenv("DSN")
-	dbName := os.Getenv("DB_NAME")
-	dsnParam := os.Getenv("DSN_PARAM")
+	sess, err := session.NewSessionWithOptions(session.Options{
+		Config:  aws.Config{Region: aws.String("ap-northeast-1")},
+		Profile: "default",
+	})
+	var svc *ssm.SSM
+
+	if err != nil {
+		if isLocal {
+			fmt.Printf("ローカル環境で実行しているため、AWS SSM に接続できません")
+		} else {
+			panic("セッション作成に失敗しました")
+		}
+	} else {
+		svc = ssm.New(sess)
+	}
+
+	dsn := getParam(svc, "DSN")
+	dbName := getParam(svc, "DB_NAME")
+	dsnParam := getParam(svc, "DSN_PARAM")
 	// MySQLに接続
 	database, err := sql.Open("mysql", dsn)
 	if err != nil {
@@ -68,7 +93,7 @@ func main() {
 	}
 
 	// データベースに接続
-	db, err := gorm.Open(mysql.Open(dsn+dbName+dsnParam), &gorm.Config{})
+	db, err = gorm.Open(mysql.Open(dsn+dbName+dsnParam), &gorm.Config{})
 	if err != nil {
 		panic("データベース接続に失敗しました")
 	}
@@ -78,22 +103,45 @@ func main() {
 	r := gin.Default()
 
 	// APIキーを読み込む
-	apiKey := os.Getenv("API_KEY")
+	apiKey := getParam(svc, "API_KEY")
 	client = openai.NewClient(apiKey) // API key
 
-	// Swagger のエンドポイントをセットアップ
-	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
+	v1 := r.Group("/v1")
+	{
+		// Swagger のエンドポイントをセットアップ
+		r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
-	// 商品一覧取得API
-	r.GET("/api/products", products)
+		// 商品一覧取得API
+		v1.GET("/api/products", products)
 
-	// 最初の画像送信用チャットAPI
-	r.POST("/api/chat-start", chatStart)
+		// 最初の画像送信用チャットAPI
+		v1.POST("/api/chat-start", chatStart)
 
-	// チャットAPI
-	r.POST("/api/chat", chat)
+		// チャットAPI
+		v1.POST("/api/chat", chat)
+	}
 
 	r.Run()
+}
+
+func getParam(svc *ssm.SSM, name string) string {
+	if isLocal {
+		return os.Getenv(name)
+	} else {
+		if svc == nil {
+			fmt.Printf("SSMが設定されていないため、パラメータ %s を取得できません", name)
+			return ""
+		}
+		res, err := svc.GetParameter(&ssm.GetParameterInput{
+			Name:           aws.String(ssmPrefix + name),
+			WithDecryption: aws.Bool(true),
+		})
+		if err != nil {
+			fmt.Printf("パラメータ %s の取得に失敗しました: %v", name, err)
+			return ""
+		}
+		return *res.Parameter.Value
+	}
 }
 
 // products godoc

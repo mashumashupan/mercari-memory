@@ -1,0 +1,12 @@
+[Unit]
+Description=mercarius_backend
+After=network.target
+
+[Service]
+ExecStart=/usr/bin/sudo /home/ec2-user/mercarius_backend
+WorkingDirectory=/home/ec2-user/
+Restart=always
+User=ec2-user
+
+[Install]
+WantedBy=multi-user.target
