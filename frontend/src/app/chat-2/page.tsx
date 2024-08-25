@@ -3,6 +3,8 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import styles from './Chat-2.module.css';
+import apiFetch from '@/utils/api';
+import { v4 as uuidv4 } from 'uuid';
 
 interface Message {
   id: number;
@@ -16,26 +18,56 @@ export default function ChatPage() {
   ]);
   const [inputText, setInputText] = useState('');
   const [capturedImage, setCapturedImage] = useState<string | null>(null);
+  const sessionId = uuidv4();
 
   useEffect(() => {
     // sessionStorageから画像データを取得
     const imageSrc = sessionStorage.getItem('capturedImage');
     if (imageSrc) {
       setCapturedImage(imageSrc);
+
+      // 画像を送信
+      const base64Image = imageSrc.split(',')[1];
+      startChat(imageSrc);
     }
   }, []);
 
-  const handleSendMessage = () => {
+  // 画像を送る
+  const startChat = async (image: string) => {
+    const responseText: string = await apiFetch('/api/chat-start', {
+      method: 'POST',
+      body: JSON.stringify({
+        session_id: sessionId,
+        image: image
+      }),
+    });
+
+    const botResponse: Message = { id: messages.length + 1, text: responseText, sender: 'bot' };
+    setMessages(prevMessages => [...prevMessages, botResponse]);
+  }
+
+  const handleSendMessage = async () => {
     if (inputText.trim() !== '') {
       const newMessage: Message = { id: messages.length + 1, text: inputText, sender: 'user' };
       setMessages(prevMessages => [...prevMessages, newMessage]);
       setInputText('');
 
+      const responseText: string = await apiFetch('/api/chat', {
+        method: 'POST',
+        body: JSON.stringify({
+          session_id: sessionId,
+          chat_message: inputText
+        }),
+      });
+
+      const botResponse: Message = { id: messages.length + 2, text: responseText, sender: 'bot' };
+      setMessages(prevMessages => [...prevMessages, botResponse]);
+
       // Simulate a bot response
-      setTimeout(() => {
-        const botResponse: Message = { id: messages.length + 2, text: "Thank you for your message. How else can I assist you?", sender: 'bot' };
-        setMessages(prevMessages => [...prevMessages, botResponse]);
-      }, 1000);
+      // setTimeout(() => {
+      //   const botResponse: Message = { id: messages.length + 2, text: "Thank you for your message. How else can I assist you?", sender: 'bot' };
+      //   setMessages(prevMessages => [...prevMessages, botResponse]);
+      // }, 1000);
     }
   };
 
@@ -48,10 +80,10 @@ export default function ChatPage() {
   return (
     <div className={styles.chatContainer}>
       <div className={styles.chatHeader}>
-          <Link href="/">
-             <button className={styles.backButton}>＜</button>
-          </Link>
-          Mercari Chat
+        <Link href="/">
+          <button className={styles.backButton}>＜</button>
+        </Link>
+        Mercari Chat
       </div>
       <div className={styles.chatMessages} id="chatMessages">
         {messages.map((message) => (
@@ -69,8 +101,8 @@ export default function ChatPage() {
                       <Link href="/photo">
                         <div className={styles.cameraIcon}>
                           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-                            <path d="M12 15.2a3.2 3.2 0 1 0 0-6.4 3.2 3.2 0 0 0 0 6.4z"/>
-                            <path d="M9 2L7.17 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2h-3.17L15 2H9zm3 15c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5z"/>
+                            <path d="M12 15.2a3.2 3.2 0 1 0 0-6.4 3.2 3.2 0 0 0 0 6.4z" />
+                            <path d="M9 2L7.17 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2h-3.17L15 2H9zm3 15c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5z" />
                           </svg>
                         </div>
                       </Link>

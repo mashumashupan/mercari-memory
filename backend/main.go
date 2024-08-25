@@ -13,6 +13,7 @@ import (
 
 	openai "github.com/sashabaranov/go-openai"
 
+	"github.com/gin-contrib/cors"
 	_ "github.com/mashumashupan/mercarius_clone/docs" // docs をインポートして Swag のドキュメントを読み込む
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
@@ -101,6 +102,13 @@ func main() {
 	db.AutoMigrate(&Products{}) // テーブル作成
 
 	r := gin.Default()
+
+	r.Use(cors.New(cors.Config{
+		AllowOrigins:     []string{"http://localhost"},
+		AllowMethods:     []string{"GET", "POST", "PUT", "DELETE"},
+		AllowHeaders:     []string{"Origin", "Content-Type", "Authorization"},
+		AllowCredentials: true,
+	}))
 
 	// APIキーを読み込む
 	apiKey := getParam(svc, "API_KEY")

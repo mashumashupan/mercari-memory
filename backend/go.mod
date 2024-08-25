@@ -4,6 +4,7 @@ go 1.22
 
 require (
 	github.com/aws/aws-sdk-go v1.55.5
+	github.com/gin-contrib/cors v1.7.2
 	github.com/gin-gonic/gin v1.10.0
 	github.com/sashabaranov/go-openai v1.28.3
 	github.com/swaggo/files v1.0.1
