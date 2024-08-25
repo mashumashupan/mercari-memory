@@ -31,15 +31,6 @@ export default function Home() {
         <ProductGrid title="Athletic apparel" products={athleticProducts} />
       </main>
       <ChatIcon />
-      <style jsx>{`
-        div {
-          position: fixed;
-          bottom: 20px;
-          right: 20px;
-          width: 50px;
-          height: 50px;
-        }
-      `}</style>
     </>
   )
 }
