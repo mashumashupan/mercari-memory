@@ -11,6 +11,9 @@ interface Message {
   text: string;
   sender: 'user' | 'bot';
 }
+interface ChatResponse {
+  response: string;
+}
 
 export default function ChatPage() {
   const [messages, setMessages] = useState<Message[]>([
@@ -27,22 +30,24 @@ export default function ChatPage() {
       setCapturedImage(imageSrc);
 
       // 画像を送信
-      const base64Image = imageSrc.split(',')[1];
-      startChat(imageSrc);
+      return () => {
+        startChat(imageSrc);
+      };
     }
   }, []);
 
   // 画像を送る
   const startChat = async (image: string) => {
-    const responseText: string = await apiFetch('/api/chat-start', {
+    const formData = new FormData();
+    formData.append('session_id', sessionId);
+    formData.append('base64_image', image);
+
+    const responseText: ChatResponse = await apiFetch('/api/chat-start', {
       method: 'POST',
-      body: JSON.stringify({
-        session_id: sessionId,
-        image: image
-      }),
+      body: formData
     });
 
-    const botResponse: Message = { id: messages.length + 1, text: responseText, sender: 'bot' };
+    const botResponse: Message = { id: messages.length + 1, text: responseText.response, sender: 'bot' };
     setMessages(prevMessages => [...prevMessages, botResponse]);
   }
 
@@ -52,15 +57,16 @@ export default function ChatPage() {
       setMessages(prevMessages => [...prevMessages, newMessage]);
       setInputText('');
 
-      const responseText: string = await apiFetch('/api/chat', {
+      const formData = new FormData();
+      formData.append('session_id', sessionId);
+      formData.append('chat_message', inputText);
+
+      const responseText: ChatResponse = await apiFetch('/api/chat', {
         method: 'POST',
-        body: JSON.stringify({
-          session_id: sessionId,
-          chat_message: inputText
-        }),
+        body: formData
       });
 
-      const botResponse: Message = { id: messages.length + 2, text: responseText, sender: 'bot' };
+      const botResponse: Message = { id: messages.length + 2, text: responseText.response, sender: 'bot' };
       setMessages(prevMessages => [...prevMessages, botResponse]);
 
       // Simulate a bot response

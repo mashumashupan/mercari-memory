@@ -8,9 +8,6 @@ async function apiFetch<T>(endpoint: string, options: FetchOptions = {}): Promis
     const url = `${BASE_URL}${endpoint}`;
 
     const defaultOptions: FetchOptions = {
-        headers: {
-            'Content-Type': 'application/json',
-        },
         ...options,
     };
 

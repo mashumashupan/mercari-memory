@@ -40,8 +40,8 @@ export default function PhotoPage() {
 
   return (
     <div className={styles.container}>
-      <button 
-        className={styles.closeButton} 
+      <button
+        className={styles.closeButton}
         onClick={() => router.push('/chat')}>
         ×
       </button>
@@ -54,11 +54,11 @@ export default function PhotoPage() {
       />
       <div className={styles.controls}>
         <label className={styles.controlButton}>
-          <input 
-            type="file" 
-            accept="image/*" 
-            onChange={selectImage} 
-            className={styles.fileInput} 
+          <input
+            type="file"
+            accept="image/*"
+            onChange={selectImage}
+            className={styles.fileInput}
           />
           <img src="/images/library-icon.png" alt="Library" />
           <span>Library</span>

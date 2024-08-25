@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"database/sql"
-	"encoding/base64"
 	"fmt"
 	"os"
 
@@ -104,7 +103,7 @@ func main() {
 	r := gin.Default()
 
 	r.Use(cors.New(cors.Config{
-		AllowOrigins:     []string{"http://localhost"},
+		AllowOrigins:     []string{"http://localhost:3000"},
 		AllowMethods:     []string{"GET", "POST", "PUT", "DELETE"},
 		AllowHeaders:     []string{"Origin", "Content-Type", "Authorization"},
 		AllowCredentials: true,
@@ -193,15 +192,7 @@ func chatStart(c *gin.Context) {
 	sessionId := c.PostForm("session_id") // セッション毎にIDを振る
 
 	// 画像データを受信
-	image, header, _ := c.Request.FormFile("image")
-	defer image.Close()
-	// ファイルサイズを取得
-	fileSize := header.Size
-	imageData := make([]byte, fileSize)
-	image.Read(imageData)
-
-	// 画像データをBase64に変換
-	base64Image := base64.StdEncoding.EncodeToString(imageData)
+	base64Image := c.PostForm("base64_image")
 
 	// ChatGPTに画像データとsystemのメッセージを送信するための，メッセージを作成
 	chat := []openai.ChatCompletionMessage{
@@ -212,7 +203,7 @@ func chatStart(c *gin.Context) {
 				{
 					Type: openai.ChatMessagePartTypeImageURL,
 					ImageURL: &openai.ChatMessageImageURL{
-						URL:    "data:image/png;base64," + base64Image,
+						URL:    base64Image,
 						Detail: openai.ImageURLDetailAuto,
 					},
 				},
