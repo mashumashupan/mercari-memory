@@ -1,8 +1,8 @@
 "use client";
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import styles from './Chat.module.css';
+import styles from './Chat-2.module.css';
 
 interface Message {
   id: number;
@@ -15,6 +15,15 @@ export default function ChatPage() {
     { id: 1, text: "Please take a photo.", sender: "bot" },
   ]);
   const [inputText, setInputText] = useState('');
+  const [capturedImage, setCapturedImage] = useState<string | null>(null);
+
+  useEffect(() => {
+    // sessionStorageから画像データを取得
+    const imageSrc = sessionStorage.getItem('capturedImage');
+    if (imageSrc) {
+      setCapturedImage(imageSrc);
+    }
+  }, []);
 
   const handleSendMessage = () => {
     if (inputText.trim() !== '') {
@@ -39,10 +48,10 @@ export default function ChatPage() {
   return (
     <div className={styles.chatContainer}>
       <div className={styles.chatHeader}>
-      <Link href="/">
-         <button className={styles.backButton}>＜</button>
-      </Link>
-        Mercari Chat
+          <Link href="/">
+             <button className={styles.backButton}>＜</button>
+          </Link>
+          Mercari Chat
       </div>
       <div className={styles.chatMessages} id="chatMessages">
         {messages.map((message) => (
@@ -56,14 +65,21 @@ export default function ChatPage() {
                 <div className={styles.messageContent}>
                   <div className={styles.chatBubble}>{message.text}</div>
                   {message.text === "Please take a photo." && (
-                    <Link href="/photo">
-                      <div className={styles.cameraIcon}>
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-                          <path d="M12 15.2a3.2 3.2 0 1 0 0-6.4 3.2 3.2 0 0 0 0 6.4z"/>
-                          <path d="M9 2L7.17 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2h-3.17L15 2H9zm3 15c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5z"/>
-                        </svg>
-                      </div>
-                    </Link>
+                    <div>
+                      <Link href="/photo">
+                        <div className={styles.cameraIcon}>
+                          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                            <path d="M12 15.2a3.2 3.2 0 1 0 0-6.4 3.2 3.2 0 0 0 0 6.4z"/>
+                            <path d="M9 2L7.17 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2h-3.17L15 2H9zm3 15c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5z"/>
+                          </svg>
+                        </div>
+                      </Link>
+                      {capturedImage && (
+                        <div className={styles.capturedImageContainer}>
+                          <img src={capturedImage} alt="Captured" className={styles.capturedImage} />
+                        </div>
+                      )}
+                    </div>
                   )}
                 </div>
               </div>

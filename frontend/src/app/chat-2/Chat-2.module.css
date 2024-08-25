@@ -135,6 +135,19 @@
     font-weight: bold;
 }
 
+/* 画像 */
+.capturedImageContainer {
+    margin-top: 15px;
+    text-align: center;
+}
+  
+.capturedImage {
+    max-width: 90%;
+    height: auto;
+    border-radius: 8px;
+    margin-top: 10px;
+}
+
 /* 戻るボタン */
 .backButton {
     background: none;
@@ -151,3 +164,4 @@
 .backButton:hover {
     color: #ccc; /* ホバー時に色を変える */
 }
+  
