@@ -1,0 +1,70 @@
+.container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+    background-color: black;
+}
+  
+.webcam {
+    width: 100%;
+    height: auto;
+    max-width: 600px;
+    border: 2px solid white;
+    border-radius: 10px;
+}
+  
+.controls {
+    display: flex;
+    justify-content: space-around;  /* ボタンを横並びに配置 */
+    width: 100%;
+    max-width: 600px;
+    margin-top: 20px;
+}
+  
+.controlButton {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 10px;
+    background-color: #333;
+    border-radius: 50%;
+    width: 70px;
+    height: 70px;
+    cursor: pointer;
+    border: none;
+    transition: background-color 0.3s ease;
+}
+  
+.controlButton svg {
+    width: 24px;
+    height: 24px;
+    fill: white;
+}
+  
+.controlButton:hover {
+    background-color: #555;
+}
+  
+.controlButtonText {
+    margin-top: 8px;
+    color: white;
+    font-size: 12px;
+    text-align: center;
+}
+  
+.usePhotoButton {
+    background-color: white;
+}
+  
+.usePhotoButton:hover {
+    background-color: #ddd;
+}
+  
+.usePhotoButton svg {
+    fill: #333;
+}
+  
+  

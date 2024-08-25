@@ -1,5 +1,8 @@
+"use client";
+
 import Header from '../components/Header'
 import ProductGrid from '../components/ProductGrid'
+import ChatIcon from '../components/ChatIcon'; 
 
 export default function Home() {
   const topsProducts = [
@@ -27,6 +30,7 @@ export default function Home() {
         <ProductGrid title="Tops & t-shirts" products={topsProducts} />
         <ProductGrid title="Athletic apparel" products={athleticProducts} />
       </main>
+      <ChatIcon />
     </>
   )
 }
