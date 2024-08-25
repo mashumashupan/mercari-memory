@@ -1,0 +1,114 @@
+.container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+    background-color: black;
+    position: relative;
+}
+  
+/* ×ボタン */
+.closeButton {
+    position: absolute;
+    top: 15px;
+    left: 30px;
+    background-color: transparent;
+    color: white;
+    font-size: 60px;
+    font-weight: 300;
+    border: none;
+    cursor: pointer;
+}
+  
+.closeButton:hover {
+    color: rgb(255, 255, 255);
+}
+  
+.previewImage {
+    max-width: 100%;
+    border-radius: 10px;
+}
+  
+.controls {
+    display: flex;
+    justify-content: space-around;
+    width: 100%;
+    max-width: 600px;
+    margin-top: 20px;
+}
+  
+.controlButton {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 10px;
+    background-color: #333;
+    border-radius: 50%;
+    width: 70px;
+    height: 70px;
+    cursor: pointer;
+    border: none;
+    transition: background-color 0.3s ease;
+}
+  
+.controlButton img {
+    width: 30px;
+    height: 30px;
+}
+  
+.controlButton:hover {
+    background-color: #555;
+}
+  
+.controlButtonText {
+    margin-top: 8px;
+    color: white;
+    font-size: 12px;
+    text-align: center;
+}
+  
+.usePhotoButton {
+    background-color: rgb(255, 255, 255);
+    border: none;
+}
+  
+.usePhotoButton img {
+    width: 30px;
+    height: 30px;
+    fill: #333;
+}
+
+/* 右側のボタン */
+.usePhotoButton {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 10px;
+    background-color: white;
+    border-radius: 50%;
+    width: 70px;
+    height: 70px;
+    cursor: pointer;
+    border: 2px solid #333;
+    transition: background-color 0.3s ease;
+}
+  
+.usePhotoButton img {
+    width: 30px;
+    height: 30px;
+}
+  
+.usePhotoButton:hover {
+    background-color: #ddd;
+}
+
+.usePhotoButtonText {
+    margin-top: 8px;
+    color: rgb(0, 0, 0);
+    font-size: 8px;
+    text-align: center;
+}
+  
