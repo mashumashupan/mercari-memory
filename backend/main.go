@@ -137,8 +137,11 @@ func chatStart(c *gin.Context) {
 	sessionId := c.PostForm("session_id") // セッション毎にIDを振る
 
 	// 画像データを受信
-	image, _, _ := c.Request.FormFile("image")
-	imageData := make([]byte, 0)
+	image, header, _ := c.Request.FormFile("image")
+	defer image.Close()
+	// ファイルサイズを取得
+	fileSize := header.Size
+	imageData := make([]byte, fileSize)
 	image.Read(imageData)
 
 	// 画像データをBase64に変換
@@ -153,7 +156,7 @@ func chatStart(c *gin.Context) {
 				{
 					Type: openai.ChatMessagePartTypeImageURL,
 					ImageURL: &openai.ChatMessageImageURL{
-						URL:    base64Image,
+						URL:    "data:image/png;base64," + base64Image,
 						Detail: openai.ImageURLDetailAuto,
 					},
 				},
