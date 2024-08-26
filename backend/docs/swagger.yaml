@@ -1,3 +1,4 @@
+basePath: /v1
 definitions:
   main.ProductsJson:
     properties:
@@ -50,9 +51,9 @@ paths:
         type: string
       - description: 画像データ
         in: formData
-        name: image
+        name: base64_image
         required: true
-        type: file
+        type: string
       produces:
       - application/json
       responses:

@@ -72,9 +72,9 @@ const docTemplate = `{
                         "required": true
                     },
                     {
-                        "type": "file",
+                        "type": "string",
                         "description": "画像データ",
-                        "name": "image",
+                        "name": "base64_image",
                         "in": "formData",
                         "required": true
                     }
@@ -133,7 +133,7 @@ const docTemplate = `{
 var SwaggerInfo = &swag.Spec{
 	Version:          "",
 	Host:             "",
-	BasePath:         "",
+	BasePath:         "/v1",
 	Schemes:          []string{},
 	Title:            "",
 	Description:      "",

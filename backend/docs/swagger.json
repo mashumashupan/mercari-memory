@@ -3,6 +3,7 @@
     "info": {
         "contact": {}
     },
+    "basePath": "/v1",
     "paths": {
         "/api/chat": {
             "post": {
@@ -61,9 +62,9 @@
                         "required": true
                     },
                     {
-                        "type": "file",
+                        "type": "string",
                         "description": "画像データ",
-                        "name": "image",
+                        "name": "base64_image",
                         "in": "formData",
                         "required": true
                     }

@@ -45,8 +45,13 @@ var db *gorm.DB
 var systemMessage = openai.ChatCompletionMessage{
 	Role: openai.ChatMessageRoleSystem,
 	Content: `フリマアプリの出品文章を物語性ある感じで書いてくれるチャットボットを作りたい．
-		対話定式で，「購入時何が良いと思ったのか」「その物にまつわるエピソード」「なぜ手放すのか（ネガティブな返答が来たらポジションに変換）」などの質問をして，魅力的な商品紹介を作るサービスです。
-		出品のフローを試したい。質問を考えた上で1つずつ提示して。その後こちらが答えるので、いくつかのやり取りの後、こちらの回答を踏まえて商品説明となる物語感ある文章を作成して。まずは商品画像が送られてきます。その後質問をしてください。`,
+対話定式で，「購入時何が良いと思ったのか」「その物にまつわるエピソード」「なぜ手放すのか（ネガティブな返答が来たらポジションに変換）」などの質問をして，魅力的な商品紹介を作るサービスです。
+「面白いアイデアですね！」のようなサービスに対するリアクションは省いて．
+「まずは、出品する商品についていくつか質問をさせていただきます。これらの質問にお答えいただければ、その回答を元に物語性のある商品説明文を作成します。」のようなのもなく端的に「いくつか質問させてください。」のみですぐに質問に移る．
+商品名が特定できたら「〜という商品で合っていますか？」「〜という商品ですね」などを言って．商品名が分からない時はユーザーに「商品名は分かりますか？」と聞いて．ユーザーもわからない時は，商品概要が分かる名前を最後にタイトルに付けて．
+出力はJSON形式にして,questionに質問を入れて,最終出力だけは，商品タイトル，キャッチコピー，魅力的な商品紹介，関連タグにそれぞれ結果を出してください．
+「ありがとうございます。それでは、ご提供いただいた情報を基に商品説明文を作成します。」のような前置きはいらない．ハッシュタグに #中古品 はいらない．また,1行目に最終出力なのか,そうでないのかの符号を付けて.
+出品のフローを試したい。質問を考えた上で1つずつ提示して。その後こちらが答えるので、いくつかのやり取りの後、こちらの回答を踏まえて商品説明となる物語感ある文章を作成して。まずは商品画像が送られてきます。その後質問をしてください。`,
 }
 
 // セッション毎にやり取りを保存するMap
@@ -103,7 +108,7 @@ func main() {
 	r := gin.Default()
 
 	r.Use(cors.New(cors.Config{
-		AllowOrigins:     []string{"http://localhost:3000"},
+		AllowOrigins:     []string{"*"},
 		AllowMethods:     []string{"GET", "POST", "PUT", "DELETE"},
 		AllowHeaders:     []string{"Origin", "Content-Type", "Authorization"},
 		AllowCredentials: true,
@@ -184,7 +189,7 @@ func products(c *gin.Context) {
 // @ID post-chat-start
 // @Accept multipart/form-data
 // @Param session_id formData string true "セッションID"
-// @Param image formData file true "画像データ"
+// @Param base64_image formData string true "画像データ"
 // @Produce json
 // @Success 200 {string} response
 // @Router /api/chat-start [post]
