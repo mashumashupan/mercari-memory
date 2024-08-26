@@ -1,4 +1,4 @@
-const BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL as string;
+const BASE_URL = 'https://89de-124-35-178-74.ngrok-free.app/v1'
 
 interface FetchOptions extends RequestInit {
     headers?: HeadersInit;
