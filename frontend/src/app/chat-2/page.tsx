@@ -22,18 +22,27 @@ export default function ChatPage() {
   ]);
   const [inputText, setInputText] = useState('');
   const [capturedImage, setCapturedImage] = useState<string | null>(null);
-  const sessionId = uuidv4();
+  const [sessionId, setSessionId] = useState<string | null>(null);
 
   useEffect(() => {
-    // sessionStorageから画像データを取得
+    // ローカルストレージからセッションIDを取得
+    let existingSessionId = localStorage.getItem('sessionId');
+    if (!existingSessionId) {
+      // セッションIDが存在しない場合は新しく生成して保存
+      existingSessionId = uuidv4();
+      localStorage.setItem('sessionId', existingSessionId);
+    }
+    setSessionId(existingSessionId);
+
+    // セッションストレージから画像データを取得
     const imageSrc = sessionStorage.getItem('capturedImage');
     if (imageSrc) {
       setCapturedImage(imageSrc);
-      startChat(imageSrc); // 画像を送信
+      startChat(imageSrc, existingSessionId); // 画像を送信
     }
   }, []);
 
-  const startChat = useCallback(async (image: string) => {
+  const startChat = useCallback(async (image: string, sessionId: string) => {
     const formData = new FormData();
     formData.append('session_id', sessionId);
     formData.append('base64_image', image);
@@ -49,10 +58,10 @@ export default function ChatPage() {
     } catch (error) {
       console.error('Error starting chat:', error);
     }
-  }, [messages.length, sessionId]);
+  }, [messages.length]);
 
   const handleSendMessage = async () => {
-    if (inputText.trim() !== '') {
+    if (inputText.trim() !== '' && sessionId) {
       const newMessage: Message = { id: messages.length + 1, text: inputText, sender: 'user' };
       setMessages(prevMessages => [...prevMessages, newMessage]);
       setInputText('');
