@@ -1,22 +1,43 @@
 "use client";
 
-import React, { useRef, useCallback, useState } from 'react';
+import React, { useRef, useCallback, useState, useEffect } from 'react';
 import Webcam from 'react-webcam';
 import { useRouter } from 'next/navigation';
+import dynamic from 'next/dynamic';
 import styles from './Photo.module.css';
 
-export default function PhotoPage() {
+// User型の定義
+interface User {
+  id: string;
+  name: string;
+}
+
+
+// ユーザー情報を読み込むカスタムフック
+const useUser = () => {
+  const [user, setUser] = useState<User | undefined>(undefined);
+
+  useEffect(() => {
+    const storedUser = sessionStorage.getItem('user');
+    if (storedUser) {
+      setUser(JSON.parse(storedUser));
+    }
+  }, []);
+
+  return { user };
+};
+
+function PhotoPage() {
   const webcamRef = useRef<Webcam>(null);
   const router = useRouter();
   const [facingMode, setFacingMode] = useState<'user' | 'environment'>('user'); // カメラのモード（フロント/リア）
+  const { user } = useUser(); // ユーザー情報の取得
 
   // 画像キャプチャとページ遷移の処理
   const capture = useCallback(() => {
     const imageSrc = webcamRef.current?.getScreenshot();
     if (imageSrc) {
-      // 画像データを sessionStorage に保存
       sessionStorage.setItem('capturedImage', imageSrc);
-      // プレビュー用のページに遷移
       router.push('/photo/preview');
     }
   }, [webcamRef, router]);
@@ -33,18 +54,24 @@ export default function PhotoPage() {
     }
   };
 
-  // カメラのフリップ処理
   const flipCamera = () => {
     setFacingMode(prevMode => (prevMode === 'user' ? 'environment' : 'user'));
   };
 
   return (
     <div className={styles.container}>
-      <button
-        className={styles.closeButton}
-        onClick={() => router.push('/chat')}>
+      <button className={styles.closeButton} onClick={() => router.push('/chat')}>
         ×
       </button>
+      {user ? (
+        <div>
+          <h2>Welcome, {user.name}!</h2>
+        </div>
+      ) : (
+        <div>
+          <p>No user information available.</p>
+        </div>
+      )}
       <Webcam
         audio={false}
         ref={webcamRef}
@@ -75,3 +102,8 @@ export default function PhotoPage() {
     </div>
   );
 }
+
+// Dynamic import to prevent SSR issues
+const DynamicPhotoPage = dynamic(() => Promise.resolve(PhotoPage), { ssr: false });
+
+export default DynamicPhotoPage;
