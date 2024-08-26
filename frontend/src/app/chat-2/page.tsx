@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import styles from './Chat-2.module.css';
 import apiFetch from '@/utils/api';
@@ -11,6 +11,7 @@ interface Message {
   text: string;
   sender: 'user' | 'bot';
 }
+
 interface ChatResponse {
   response: string;
 }
@@ -28,28 +29,27 @@ export default function ChatPage() {
     const imageSrc = sessionStorage.getItem('capturedImage');
     if (imageSrc) {
       setCapturedImage(imageSrc);
-
-      // 画像を送信
-      return () => {
-        startChat(imageSrc);
-      };
+      startChat(imageSrc); // 画像を送信
     }
   }, []);
 
-  // 画像を送る
-  const startChat = async (image: string) => {
+  const startChat = useCallback(async (image: string) => {
     const formData = new FormData();
     formData.append('session_id', sessionId);
     formData.append('base64_image', image);
 
-    const responseText: ChatResponse = await apiFetch('/api/chat-start', {
-      method: 'POST',
-      body: formData
-    });
+    try {
+      const responseText: ChatResponse = await apiFetch('/api/chat-start', {
+        method: 'POST',
+        body: formData
+      });
 
-    const botResponse: Message = { id: messages.length + 1, text: responseText.response, sender: 'bot' };
-    setMessages(prevMessages => [...prevMessages, botResponse]);
-  }
+      const botResponse: Message = { id: messages.length + 1, text: responseText.response, sender: 'bot' };
+      setMessages(prevMessages => [...prevMessages, botResponse]);
+    } catch (error) {
+      console.error('Error starting chat:', error);
+    }
+  }, [messages.length, sessionId]);
 
   const handleSendMessage = async () => {
     if (inputText.trim() !== '') {
@@ -61,19 +61,17 @@ export default function ChatPage() {
       formData.append('session_id', sessionId);
       formData.append('chat_message', inputText);
 
-      const responseText: ChatResponse = await apiFetch('/api/chat', {
-        method: 'POST',
-        body: formData
-      });
+      try {
+        const responseText: ChatResponse = await apiFetch('/api/chat', {
+          method: 'POST',
+          body: formData
+        });
 
-      const botResponse: Message = { id: messages.length + 2, text: responseText.response, sender: 'bot' };
-      setMessages(prevMessages => [...prevMessages, botResponse]);
-
-      // Simulate a bot response
-      // setTimeout(() => {
-      //   const botResponse: Message = { id: messages.length + 2, text: "Thank you for your message. How else can I assist you?", sender: 'bot' };
-      //   setMessages(prevMessages => [...prevMessages, botResponse]);
-      // }, 1000);
+        const botResponse: Message = { id: messages.length + 2, text: responseText.response, sender: 'bot' };
+        setMessages(prevMessages => [...prevMessages, botResponse]);
+      } catch (error) {
+        console.error('Error sending message:', error);
+      }
     }
   };
 
