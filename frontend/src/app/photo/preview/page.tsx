@@ -8,13 +8,14 @@ export default function PhotoPreviewPage() {
   const router = useRouter();
   const [imageSrc, setImageSrc] = useState<string | null>(null);
 
-  // クライアントサイドでのみ実行
   useEffect(() => {
-    const storedImage = sessionStorage.getItem('capturedImage');
-    if (!storedImage) {
-      router.push('/photo'); // 画像がない場合は/photoにリダイレクト
-    } else {
-      setImageSrc(storedImage);
+    if (typeof window !== "undefined") {
+      const storedImage = sessionStorage.getItem('capturedImage');
+      if (!storedImage) {
+        router.push('/photo'); // 画像がない場合は/photoにリダイレクト
+      } else {
+        setImageSrc(storedImage);
+      }
     }
   }, [router]);
 
@@ -23,8 +24,10 @@ export default function PhotoPreviewPage() {
   }
 
   const handleUsePhoto = () => {
-    sessionStorage.setItem('selectedImage', imageSrc);
-    router.push('/chat-2'); // /chat-2ページに遷移
+    if (typeof window !== "undefined") {
+      sessionStorage.setItem('selectedImage', imageSrc);
+      router.push('/chat-2'); // /chat-2ページに遷移
+    }
   };
 
   const handleEdit = () => {
