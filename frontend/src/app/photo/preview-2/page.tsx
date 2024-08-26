@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { useRouter } from 'next/router';
-import styles from './Preview.module.css';
+import styles from './Preview-2.module.css';
 
 export default function PhotoPreviewPage() {
   const router = useRouter();
