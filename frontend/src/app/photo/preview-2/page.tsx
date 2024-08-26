@@ -1,25 +1,18 @@
 "use client";
 
-import React, { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
+import React from 'react';
+import { useRouter } from 'next/router';
 import styles from './Preview.module.css';
 
 export default function PhotoPreviewPage() {
   const router = useRouter();
-  const [imageSrc, setImageSrc] = useState<string | null>(null);
+  const { image } = router.query;  // 修正: router.queryを使用してクエリパラメータを取得
+  const imageSrc = typeof image === 'string' ? image : '';
 
-  // クライアントサイドでのみ実行
-  useEffect(() => {
-    const storedImage = sessionStorage.getItem('capturedImage');
-    if (!storedImage) {
-      router.push('/photo'); // 画像がない場合は/photoにリダイレクト
-    } else {
-      setImageSrc(storedImage);
-    }
-  }, [router]);
-
+  // 画像がない場合は/photoに戻る
   if (!imageSrc) {
-    return null; // 画像がない場合は何も表示しない（リダイレクト中）
+    router.push('/photo');
+    return null;
   }
 
   const handleUsePhoto = () => {
@@ -29,7 +22,7 @@ export default function PhotoPreviewPage() {
 
   const handleEdit = () => {
     console.log("Editing photo...");
-    // 画像編集機能を実装して、終了後に再度プレビュー画面に戻るか、別の処理を行う
+    // 画像編集機能をここに実装
   };
 
   const handleRetake = () => {
@@ -49,7 +42,7 @@ export default function PhotoPreviewPage() {
           <img src="/images/retake-icon.png" alt="Retake" />
           <span className={styles.controlButtonText}>Retake</span>
         </button>
-        <button className={`${styles.usePhotoButton}`} onClick={handleUsePhoto}>
+        <button className={styles.usePhotoButton} onClick={handleUsePhoto}>
           <img src="/images/use-photo-icon.png" alt="Use Photo" />
           <span className={styles.usePhotoButtonText}>Use Photo</span>
         </button>
