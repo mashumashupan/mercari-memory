@@ -44,10 +44,10 @@ export default function PhotoPreviewPage() {
       <button className={styles.closeButton} onClick={() => router.push('/chat')}>×</button>
       <img src={imageSrc} alt="Preview" className={styles.previewImage} />
       <div className={styles.controls}>
-        <button className={styles.controlButton} onClick={handleEdit}>
+        {/* <button className={styles.controlButton} onClick={handleEdit}>
           <img src="/images/edit-icon.png" alt="Edit" />
           <span className={styles.controlButtonText}>Edit</span>
-        </button>
+        </button> */}
         <button className={styles.controlButton} onClick={handleRetake}>
           <img src="/images/retake-icon.png" alt="Retake" />
           <span className={styles.controlButtonText}>Retake</span>
