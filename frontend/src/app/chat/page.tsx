@@ -39,7 +39,7 @@ export default function ChatPage() {
       // setMessages(prevMessages => [...prevMessages, botResponse]);
       // Simulate a bot response
       setTimeout(() => {
-        const botResponse: Message = { id: messages.length + 2, text: "Thank you for your message. How else can I assist you?", sender: 'bot' };
+        const botResponse: Message = { id: messages.length + 2, text: "Please take a photo.", sender: 'bot' };
         setMessages(prevMessages => [...prevMessages, botResponse]);
       }, 1000);
     }
