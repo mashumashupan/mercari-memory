@@ -1,0 +1,46 @@
+.footer {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    display: flex;
+    justify-content: space-around;
+    background-color: white;
+    padding: 8px; /* パディングを8pxに減らして縦の長さを短く */
+    box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+    height: 50px; /* 高さを指定して縦の長さを制限 */
+}
+  
+.iconContainer {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: relative;
+}
+  
+.iconImage {
+    height: 24px;
+    width: 24px;
+    margin-bottom: 2px; /* アイコンの下のマージンを減らす */
+}
+  
+.notificationBadge {
+    position: absolute;
+    top: 0;
+    right: 5px;
+    background-color: #e60000;
+    color: white;
+    border-radius: 50%;
+    height: 16px;
+    width: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+}
+
+.textSm {
+    font-size: 9px; /* フォントサイズを小さくする */
+    line-height: 1.2; /* 行の高さを調整してコンパクトにする */
+}
+  
