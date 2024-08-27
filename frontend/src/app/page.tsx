@@ -3,7 +3,7 @@
 import Header from '../components/Header'
 import ProductGrid from '../components/ProductGrid'
 import ChatIcon from '../components/ChatIcon'; 
-import Story from '../components/Story';
+// import Story from '../components/Story';
 import Footer from '../components/Footer';
 
 export default function Home() {
@@ -36,7 +36,7 @@ export default function Home() {
   return (
     <>
       <Header />
-      <Story stories={stories} />
+      {/* <Story stories={stories} /> */}
       <main className="container mx-auto px-4 py-8">
         <ProductGrid title="Tops & t-shirts" products={topsProducts} />
         <ProductGrid title="Athletic apparel" products={athleticProducts} />
