@@ -1,0 +1,36 @@
+/* Header.module.css */
+.header {
+    background-color: #1e40af; /* bg-blue-800 */
+    color: white;
+    padding-top: 0.5rem; /* 上の余白を大きく */
+    padding-bottom: 0.5rem; /* 下の余白を大きく */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column; /* 垂直方向にレイアウト */
+}
+
+.title {
+    font-size: 1.5rem; /* テキストサイズを調整 */
+    font-weight: bold;
+    margin-bottom: 0.01rem; /* サーチバーとの間に余白を追加 */
+    text-align: center; /* 中央揃え */
+}
+
+.searchInput {
+    width: 100%;
+    max-width: 800px; /* サーチバーの最大幅を設定 */
+    height: 30px; /* サーチバーの高さを50pxに設定 */
+    padding-left: 1rem; /* px-4 */
+    padding-right: 1rem; /* px-4 */
+    padding-top: 0.5rem; /* py-2 */
+    padding-bottom: 0.5rem; /* py-2 */
+    border-radius: 9999px; /* rounded-full */
+    background-color: #1d4ed8; /* bg-blue-700 */
+    color: white;
+    /* placeholder-color: #93c5fd;  */
+    /* placeholder-blue-300 */
+    outline: none;
+    box-shadow: 0 0 0 2px #3b82f6; /* focus:ring-2 focus:ring-blue-500 */
+    text-align: center; /* サーチバーのテキストを中央揃え */
+}
