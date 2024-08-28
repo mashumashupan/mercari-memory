@@ -1,0 +1,12 @@
+.container {
+    width: 100vw; /* ビューポート全体の幅 */
+    height: 100vh; /* ビューポート全体の高さ */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    overflow: hidden; /* これを追加して、はみ出しを隠します */
+}
+  

@@ -1,0 +1,28 @@
+.storyContainer {
+    display: flex;
+    justify-content: flex-start;
+    padding: 1rem 0;
+    overflow-x: auto;
+}
+  
+.storyItem {
+    flex-shrink: 0;
+    width: 5rem; /* ○の大きさ */
+    height: 5rem;
+    border-radius: 50%;
+    overflow: hidden;
+    margin: 0 1rem; /* 各アイテムの間隔 */
+    border: 3px solid transparent; /* 初期のボーダー */
+    background-image: linear-gradient(white, white), linear-gradient(to right, #f09433, #e6683c, #dc2743, #cc2366, #bc1888); /* グラデーションボーダー */
+    background-origin: border-box;
+    background-clip: content-box, border-box;
+    
+}
+  
+.storyItem img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 50%;
+}
+  
