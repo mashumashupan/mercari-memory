@@ -16,6 +16,19 @@
     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 } */
 
+/* botのアイコン */
+.chatIcon {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background-color: #ffffff;
+    background-image: url('/images/bot-icon.png'); /* ここで画像を指定 */
+    background-size: cover; /* 画像をアイコンサイズに合わせて調整 */
+    background-position: center; /* 画像を中央に配置 */
+    margin-right: 10px;
+    flex-shrink: 0;
+}
+
 .chatHeader {
     display: flex;
     align-items: center;
@@ -56,15 +69,7 @@
     display: flex;
     justify-content: flex-end;
 }
-  
-.chatIcon {
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    background-color: #5e6ef2;
-    margin-right: 10px;
-    flex-shrink: 0;
-}
+
   
 .messageContent {
     display: flex;

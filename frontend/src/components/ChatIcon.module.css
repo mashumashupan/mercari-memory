@@ -1,14 +1,13 @@
 .chatIconContainer {
     position: fixed;
-    bottom: 20px; /* 画面下から20pxの位置 */
-    right: 20px;  /* 画面右から20pxの位置 */
-    width: 100px;
-    height: 100px;
+    bottom: 40px; /* 画面下から20pxの位置 */
+    right: 30px;  /* 画面右から20pxの位置 */
     z-index: 1000; /* 他の要素よりも前面に表示 */
+    width: auto; /* 自動調整に変更 */
+    height: auto; /* 自動調整に変更 */
 }
-  
+
 .chatIconContainer img {
-    width: 80px;
-    height: 80px;
+    width: 100%; /* 親要素の幅に合わせる */
+    height: auto; /* 高さを自動調整 */
 }
-  

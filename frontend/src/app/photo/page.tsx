@@ -30,7 +30,10 @@ const useUser = () => {
 function PhotoPage() {
   const webcamRef = useRef<Webcam>(null);
   const router = useRouter();
-  const [facingMode, setFacingMode] = useState<'user' | 'environment'>('user'); // カメラのモード（フロント/リア）
+  // 初めから外カメラ
+  const [facingMode, setFacingMode] = useState<'user' | 'environment'>('environment');
+  // 反対の場合
+  // const [facingMode, setFacingMode] = useState<'user' | 'environment'>('user');
   const { user } = useUser(); // ユーザー情報の取得
 
   // 画像キャプチャとページ遷移の処理
