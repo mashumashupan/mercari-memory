@@ -196,7 +196,7 @@ export default function ChatPage() {
           <div className={styles.userMessageContainer}>
             <Link href="/listing">
               <div className={styles.chatIconContainer}>
-                <Image src="/images/chat-icon2.png" alt="Chat Icon" width={150} height={150} />
+                <Image src="/images/chat-icon2.png" alt="Chat Icon" width={200} height={200} />
               </div>
             </Link>
           </div>
