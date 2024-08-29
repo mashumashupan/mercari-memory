@@ -1,10 +1,14 @@
 "use client";
 
 import { useState, useEffect, useCallback } from 'react';
+// import { useHistory } from 'react-router-dom';
 import Link from 'next/link';
 import styles from './Chat-2.module.css';
 import apiFetch from '@/utils/api';
 import { v4 as uuidv4 } from 'uuid';
+import { useRouter } from 'next/navigation';
+import { useChat } from "@/store/use-chat-store";
+import Image from 'next/image';
 
 interface Message {
   id: number;
@@ -16,6 +20,13 @@ interface ChatResponse {
   response: string;
 }
 
+interface ChatResponseJSON {
+  question?: string;
+  title?: string;
+  description?: string;
+  price?: number;
+}
+
 export default function ChatPage() {
   const [messages, setMessages] = useState<Message[]>([
     { id: 1, text: "Please take a photo.", sender: "bot" },
@@ -23,6 +34,11 @@ export default function ChatPage() {
   const [inputText, setInputText] = useState('');
   const [capturedImage, setCapturedImage] = useState<string | null>(null);
   const [sessionId, setSessionId] = useState<string | null>(null);
+  const [isChatEnd, setIsChatEnd] = useState(false);
+  //　画面遷移のためのrouter
+  const router = useRouter();
+  // 状態を更新する関数、use-chat-store.tsxから取り出す
+  const { setTitle, setDescription, setPrice } = useChat();
 
   useEffect(() => {
     // ローカルストレージからセッションIDを取得
@@ -34,13 +50,36 @@ export default function ChatPage() {
     }
     setSessionId(existingSessionId);
 
-    // セッションストレージから画像データを取得
-    const imageSrc = sessionStorage.getItem('capturedImage');
-    if (imageSrc) {
-      setCapturedImage(imageSrc);
-      startChat(imageSrc, existingSessionId); // 画像を送信
-    }
+    return () => {
+      // セッションストレージから画像データを取得
+      const imageSrc = sessionStorage.getItem('capturedImage');
+      if (imageSrc) {
+        setCapturedImage(imageSrc);
+        startChat(imageSrc, existingSessionId); // 画像を送信
+      }
+    };
   }, []);
+
+  // APIからJSONを取ってきて、インターフェースの型に合わせて返す
+  const sendChat = async (api: 'chat' | 'chat-start', formData: FormData): Promise<ChatResponseJSON> => {
+    const chatResponse: ChatResponse = await apiFetch(`/api/${api}`, {
+      method: 'POST',
+      body: formData
+    });
+    try {
+      // priceがnumberになるようにJSONをパース
+      const json = JSON.parse(chatResponse.response);
+      return {
+        question: json?.question,
+        title: json?.title,
+        description: json?.description,
+        price: json?.price
+      } as ChatResponseJSON; // priceがnumberになる
+    } catch (error) {
+      console.error('Error parsing JSON:', error);
+      return {};
+    }
+  };
 
   const startChat = useCallback(async (image: string, sessionId: string) => {
     const formData = new FormData();
@@ -48,12 +87,9 @@ export default function ChatPage() {
     formData.append('base64_image', image);
 
     try {
-      const responseText: ChatResponse = await apiFetch('/api/chat-start', {
-        method: 'POST',
-        body: formData
-      });
+      const responseJSON: ChatResponseJSON = await sendChat('chat-start', formData);
 
-      const botResponse: Message = { id: messages.length + 1, text: responseText.response, sender: 'bot' };
+      const botResponse: Message = { id: messages.length + 1, text: responseJSON.question ?? '', sender: 'bot' };
       setMessages(prevMessages => [...prevMessages, botResponse]);
     } catch (error) {
       console.error('Error starting chat:', error);
@@ -71,13 +107,25 @@ export default function ChatPage() {
       formData.append('chat_message', inputText);
 
       try {
-        const responseText: ChatResponse = await apiFetch('/api/chat', {
-          method: 'POST',
-          body: formData
-        });
-
-        const botResponse: Message = { id: messages.length + 2, text: responseText.response, sender: 'bot' };
-        setMessages(prevMessages => [...prevMessages, botResponse]);
+        const responseJSON: ChatResponseJSON = await sendChat('chat', formData);
+        // タイトルがある場合は最終出力
+        if (responseJSON.title) {
+          setIsChatEnd(true);
+          setTitle(responseJSON.title); // ボタンを押すと次の画面に遷移するようにしたからコメントアウト
+          setDescription(responseJSON.description ?? '');
+          setPrice(responseJSON.price ?? 0);
+          // ここに画面遷移処理を追加
+          // router.push('/listing');
+          const botResponse: Message = { id: messages.length + 2, text: 'overview is ready!!!', sender: 'bot' };
+          setMessages(prevMessages => [...prevMessages, botResponse]);
+        }
+        // それ以外は通常の返答
+        else {
+          // ここにチャットの更新処理
+          const botResponse: Message = { id: messages.length + 2, text: responseJSON.question ?? '', sender: 'bot' };
+          setMessages(prevMessages => [...prevMessages, botResponse]);
+        }
+        // const history = useHistory();
       } catch (error) {
         console.error('Error sending message:', error);
       }
@@ -89,6 +137,11 @@ export default function ChatPage() {
       handleSendMessage();
     }
   };
+
+  //　リンクで画面遷移する
+  // const gotoListing = () => {
+  //   router.push('/listing');
+  // }
 
   return (
     <div className={styles.chatContainer}>
@@ -119,6 +172,7 @@ export default function ChatPage() {
                           </svg>
                         </div>
                       </Link>
+                      {/* // TODO: listingに持って行く */}
                       {capturedImage && (
                         <div className={styles.capturedImageContainer}>
                           <img src={capturedImage} alt="Captured" className={styles.capturedImage} />
@@ -135,6 +189,17 @@ export default function ChatPage() {
             )}
           </div>
         ))}
+
+        {/* // チャットが終了した場合アイコン表示 */}
+        {isChatEnd && (
+          <div className={styles.userMessageContainer}>
+            <Link href="/listing">
+              <div className={styles.chatIconContainer}>
+                <Image src="/images/chat-icon.png" alt="Chat Icon" width={150} height={150} />
+              </div>
+            </Link>
+          </div>
+        )}
       </div>
       <div className={styles.chatInput}>
         <input

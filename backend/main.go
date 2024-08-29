@@ -26,17 +26,20 @@ import (
 
 // データベース用
 type Products struct {
-	Id    uint    `gorm:"primaryKey"`
-	Name  string  `gorm:"type:varchar(255)"`
-	Price float64 `gorm:"type:decimal(10,2)"`
-	Image string  `gorm:"type:varchar(255)"`
+	Id          uint    `gorm:"primaryKey"`
+	Name        string  `gorm:"type:varchar(255)"`
+	Price       float64 `gorm:"type:decimal(10,2)"`
+	Image       string  `gorm:"type:varchar(255)"`
+	Description string  `gorm:"type:varchar(255)"`
 }
 
-// APIのレスポンス用
+// APIのリクエスト/レスポンス用
 type ProductsJson struct {
-	Name  string  `json:"name"`
-	Price float64 `json:"price"`
-	Image string  `json:"image"`
+	Id          uint    `json:"id"`
+	Name        string  `json:"name"`
+	Price       float64 `json:"price"`
+	Image       string  `json:"image"`
+	Description string  `json:"description"`
 }
 
 var db *gorm.DB
@@ -44,14 +47,24 @@ var db *gorm.DB
 // 最初に送るメッセージ
 var systemMessage = openai.ChatCompletionMessage{
 	Role: openai.ChatMessageRoleSystem,
-	Content: `フリマアプリの出品文章を物語性ある感じで書いてくれるチャットボットを作りたい．
-対話定式で，「購入時何が良いと思ったのか」「その物にまつわるエピソード」「なぜ手放すのか（ネガティブな返答が来たらポジションに変換）」などの質問をして，魅力的な商品紹介を作るサービスです。
-「面白いアイデアですね！」のようなサービスに対するリアクションは省いて．
-「まずは、出品する商品についていくつか質問をさせていただきます。これらの質問にお答えいただければ、その回答を元に物語性のある商品説明文を作成します。」のようなのもなく端的に「いくつか質問させてください。」のみですぐに質問に移る．
-商品名が特定できたら「〜という商品で合っていますか？」「〜という商品ですね」などを言って．商品名が分からない時はユーザーに「商品名は分かりますか？」と聞いて．ユーザーもわからない時は，商品概要が分かる名前を最後にタイトルに付けて．
-出力はJSON形式にして,questionに質問を入れて,最終出力だけは，商品タイトル，キャッチコピー，魅力的な商品紹介，関連タグにそれぞれ結果を出してください．
-「ありがとうございます。それでは、ご提供いただいた情報を基に商品説明文を作成します。」のような前置きはいらない．ハッシュタグに #中古品 はいらない．また,1行目に最終出力なのか,そうでないのかの符号を付けて.
-出品のフローを試したい。質問を考えた上で1つずつ提示して。その後こちらが答えるので、いくつかのやり取りの後、こちらの回答を踏まえて商品説明となる物語感ある文章を作成して。まずは商品画像が送られてきます。その後質問をしてください。`,
+	Content: `あなたは「フリマアプリの出品文章を物語性ある感じで書いてくれるチャットボット」です．
+	- 「購入時何が良いと思ったのか」「その物にまつわるエピソード」「なぜ手放すのか（ネガティブな返答が来たらポジションに変換）」などを質問し，最終的に魅力的な商品紹介を作ってください。
+	- 「面白いアイデアですね！」のようなユーザーのメッセージに対するリアクションは省くこと．
+	- 「まずは、出品する商品についていくつか質問をさせていただきます。これらの質問にお答えいただければ、その回答を元に物語性のある商品説明文を作成します。」のような無駄な会話も不要．
+	- 商品画像を受け取ったら「いくつか質問させてください。」のように質問に移る．
+	- 商品名が特定できたら「〜という商品で合っていますか？」「〜という商品ですね」などを言って．商品名が分からない時はユーザーに「商品名は分かりますか？」と聞いて．ユーザーもわからない時は，商品概要が分かる名前を最後にタイトルに付けて．
+	- ハッシュタグに #中古品 は禁止．
+	- 質問は必ず一問一答になるように1つずつ提示すること．
+	- ユーザーといくつかのやり取りをした後、ユーザーの回答を踏まえて商品説明となる物語感ある文章を作成する。
+	- 数値で値段を考えて。ドルの価格で適正な金額を考えて、単位を入れないで数値のみにして。
+	- 質問か最終出力以外のメッセージは"""絶対に"""不要．
+	- (important) あなたの全ての返答は必ずJSON形式にすること．フォーマットは以下の通りです．
+	  {
+		"question": "質問内容(最終出力では含めない)",
+		"title": "商品名(最終出力のみ含める)",
+		"description": "商品説明文(最終出力のみ含める)",
+		"price": 価格(最終出力のみ含める),
+  	  }`,
 }
 
 // セッション毎にやり取りを保存するMap
@@ -126,6 +139,9 @@ func main() {
 		// 商品一覧取得API
 		v1.GET("/api/products", products)
 
+		// 商品登録API
+		v1.POST("/api/create-product", createProduct)
+
 		// 最初の画像送信用チャットAPI
 		v1.POST("/api/chat-start", chatStart)
 
@@ -173,6 +189,7 @@ func products(c *gin.Context) {
 	productsJson := []ProductsJson{}
 	for _, e := range products {
 		productsJson = append(productsJson, ProductsJson{
+			Id:    e.Id,
 			Name:  e.Name,
 			Price: e.Price,
 			Image: e.Image,
@@ -181,6 +198,44 @@ func products(c *gin.Context) {
 
 	// JSONを返す
 	c.JSON(200, productsJson)
+}
+
+// createProduct godoc
+// @Summary 商品登録API
+// @Description 商品を登録するAPI
+// @ID post-create-product
+// @Accept json
+// @Param product body ProductsJson true "商品情報"
+// @Produce json
+// @Success 200 {object} ProductsJson
+// @Router /api/create-product [post]
+func createProduct(c *gin.Context) {
+
+	// リクエストのJSONから商品情報を取得
+	var product ProductsJson
+	if err := c.ShouldBindJSON(&product); err != nil {
+		c.JSON(400, gin.H{
+			"error": err.Error(),
+		})
+		return
+	}
+
+	// データベース用の構造体に変換
+	productDb := Products{
+		Name:        product.Name,
+		Price:       product.Price,
+		Image:       product.Image,
+		Description: product.Description,
+	}
+
+	// データベースに商品情報を登録
+	db.Create(&productDb)
+
+	// 商品情報JSONにIDを設定
+	product.Id = productDb.Id
+
+	// 商品情報JSONを返す
+	c.JSON(200, product)
 }
 
 // chatStart godoc

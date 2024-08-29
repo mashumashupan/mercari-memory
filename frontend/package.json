@@ -13,8 +13,10 @@
     "next": "^14.2.5",
     "react": "^18",
     "react-dom": "^18",
+    "react-router-dom": "^6.26.1",
     "react-webcam": "^7.2.0",
-    "uuid": "^10.0.0"
+    "uuid": "^10.0.0",
+    "zustand": "^4.5.5"
   },
   "devDependencies": {
     "@types/node": "^20",

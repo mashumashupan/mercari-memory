@@ -89,6 +89,38 @@ const docTemplate = `{
                 }
             }
         },
+        "/api/create-product": {
+            "post": {
+                "description": "商品を登録するAPI",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "商品登録API",
+                "operationId": "post-create-product",
+                "parameters": [
+                    {
+                        "description": "商品情報",
+                        "name": "product",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/main.ProductsJson"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/main.ProductsJson"
+                        }
+                    }
+                }
+            }
+        },
         "/api/products": {
             "get": {
                 "description": "商品一覧を取得するAPI",
@@ -115,6 +147,12 @@ const docTemplate = `{
         "main.ProductsJson": {
             "type": "object",
             "properties": {
+                "description": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
                 "image": {
                     "type": "string"
                 },

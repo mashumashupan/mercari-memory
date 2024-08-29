@@ -4,20 +4,32 @@ import React, { useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import styles from './listing.module.css';
+import { useChat } from '@/store/use-chat-store';
+import { useEffect } from 'react';
 
-export default function SellItemForm() {
-    const [title, setTitle] = useState<string>('');
-    const [description, setDescription] = useState<string>('');
-    const [hashtags, setHashtags] = useState<string>('');
-    const [shippingPayer, setShippingPayer] = useState<'seller' | 'buyer'>('seller');
-    const [price, setPrice] = useState<string>('');
+export default function SellItemForm() { // ここにuseHistory 
+    // const [title, setTitle] = useState<string>(''); // 画面に表示するコンポーネントを取り出す
+    // const [description, setDescription] = useState<string>('');
+    // const [price, setPrice] = useState<string>('');
+    const { title, description, price, setPrice } = useChat();
+    const [capturedImage, setCapturedImage] = useState<string | null>(null);
+
+    useEffect(() => {
+        return () => {
+            // セッションストレージから画像データを取得
+            const imageSrc = sessionStorage.getItem('capturedImage');
+            if (imageSrc) {
+                setCapturedImage(imageSrc);
+            }
+        };
+    }, []);
 
     return (
         <div className={styles['sell-item-form']}>
             <header className={styles['header']}>
                 <Link href="/">
                     <button className={styles['close-button']}>&times;</button>
-                </Link>   
+                </Link>
                 <h1 className={styles['h1']}>Sell an item</h1>
             </header>
 
@@ -27,12 +39,12 @@ export default function SellItemForm() {
                         <div key={i} className={`${styles['photo-placeholder']} ${i === 0 ? styles.active : ''}`}>
                             {i === 0 && (
                                 <div className={styles['photo-placeholder-content']}>
-                                    <Image 
-                                        src="/images/photo-camera-icon.png" 
-                                        alt="Camera Icon" 
-                                        width={50} 
+                                    <Image
+                                        src={capturedImage ?? "/images/photo-camera-icon.png"}
+                                        alt="Camera Icon"
+                                        width={50}
                                         height={50}
-                                        className={styles['camera-icon']} 
+                                        className={styles['camera-icon']}
                                     />
                                     <p>Add up to<br />12 photos</p>
                                 </div>
@@ -42,48 +54,40 @@ export default function SellItemForm() {
                 </div>
 
                 <section className={styles['description-section']}>
-                    <h2 className={styles['h2']}>Description</h2>
+                    <h2 className={styles['h2']}>Title</h2>
                     <input
                         className={styles['input-field']}
-                        placeholder="What are you selling?"
+
                         value={title}
-                        onChange={(e) => setTitle(e.target.value)}
+
                         maxLength={80} />
+                </section>
+                <section className={styles['description-section']}>
+                    <h2 className={styles['h2']}>Description</h2>
                     <textarea
                         className={styles['textarea-field']}
-                        placeholder="Describe your item (5+ words)"
+
                         value={description}
-                        onChange={(e) => setDescription(e.target.value)}
-                        maxLength={1000} />
-                    <input
-                        className={styles['input-field']}
-                        placeholder="Add up to 7 hashtags (Optional)"
-                        value={hashtags}
-                        onChange={(e) => setHashtags(e.target.value)}
-                        maxLength={7} />
+
+                        maxLength={100000} />
                 </section>
 
-                <section className={styles['details-section']}>
-                    <h2 className={styles['h2']}>Details</h2>
-                    {['category', 'brand', 'condition', 'color'].map((item) => (
-                        <select key={item} className={styles['select-field']}>
-                            <option value="">{`Select ${item}${item === 'color' ? ' (optional)' : ''}`}</option>
-                            <option>Option 1</option>
-                            <option>Option 2</option>
-                        </select>
-                    ))}
-                </section>
 
                 <section className={styles['pricing-section']}>
                     <h2 className={styles['h2']}>Pricing</h2>
                     <div className={styles['price-input-container']}>
                         <span className={styles['currency-symbol']}>$</span>
                         <input
-                            type="number"
                             className={styles['price-input']}
-                            placeholder="Set your price"
+                            onChange={(e) => {
+                                console.log(e.target.value);
+                                // 数字のみを受け付ける、正規表現
+                                if (!/^\d+$/.test(e.target.value)) {
+                                    setPrice(Number(e.target.value)); //テキストを読み取り、数値に変換
+                                }
+                            }}
                             value={price}
-                            onChange={(e) => setPrice(e.target.value)} />
+                        />
                     </div>
                 </section>
 

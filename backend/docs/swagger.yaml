@@ -2,6 +2,10 @@ basePath: /v1
 definitions:
   main.ProductsJson:
     properties:
+      description:
+        type: string
+      id:
+        type: integer
       image:
         type: string
       name:
@@ -62,6 +66,27 @@ paths:
           schema:
             type: string
       summary: 最初の画像送信用チャットAPI
+  /api/create-product:
+    post:
+      consumes:
+      - application/json
+      description: 商品を登録するAPI
+      operationId: post-create-product
+      parameters:
+      - description: 商品情報
+        in: body
+        name: product
+        required: true
+        schema:
+          $ref: '#/definitions/main.ProductsJson'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/main.ProductsJson'
+      summary: 商品登録API
   /api/products:
     get:
       description: 商品一覧を取得するAPI
