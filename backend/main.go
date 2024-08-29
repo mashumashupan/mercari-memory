@@ -62,7 +62,7 @@ var systemMessage = openai.ChatCompletionMessage{
 	  {
 		"question": "質問内容(最終出力では含めない)",
 		"title": "商品名(最終出力のみ含める)",
-		"description": "商品説明文(最終出力のみ含める, 英語の後に日本語をつける)",
+		"description": "商品説明文(最終出力のみ含める)",
 		"price": 価格(最終出力のみ含める),
   	  }`,
 }

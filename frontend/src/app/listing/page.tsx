@@ -69,7 +69,8 @@ export default function SellItemForm() { // ここにuseHistory
 
                         value={description}
 
-                        maxLength={100000} />
+                        maxLength={100000}
+                        rows={10} />
                 </section>
 
 
@@ -93,7 +94,6 @@ export default function SellItemForm() { // ここにuseHistory
 
                 <div className={styles['form-actions']}>
                     <button className={styles['list-button']}>List</button>
-                    <button className={styles['save-draft-button']}>Save draft</button>
                 </div>
             </div>
         </div>
