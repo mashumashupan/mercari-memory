@@ -53,6 +53,7 @@ export default function ChatPage() {
     return () => {
       // セッションストレージから画像データを取得
       const imageSrc = sessionStorage.getItem('capturedImage');
+      console.log('imageSrc:', imageSrc);
       if (imageSrc) {
         setCapturedImage(imageSrc);
         startChat(imageSrc, existingSessionId); // 画像を送信
