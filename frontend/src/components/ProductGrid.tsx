@@ -1,12 +1,9 @@
 import Image from 'next/image';
+import { ProductsJsonType } from '@/app/page';
 
 interface ProductGridProps {
     title: string;
-    products: {
-        name: string;
-        price: number;
-        image: string;
-    }[];
+    products: ProductsJsonType[];
 }
 
 export default function ProductGrid({ title, products }: ProductGridProps) {
@@ -21,7 +18,7 @@ export default function ProductGrid({ title, products }: ProductGridProps) {
                     <div key={index} className="bg-blue-800 rounded-lg overflow-hidden">
                         <div className="aspect-w-1 aspect-h-1 relative">
                             <Image
-                                src={product.image}
+                                src={product.image ?? 'https://placehold.co/200x200/900C3F/31343C'}
                                 alt={product.name}
                                 layout="fill"
                                 objectFit="cover"

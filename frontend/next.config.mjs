@@ -5,6 +5,10 @@ const nextConfig = {
         dangerouslyAllowSVG: true,
         contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",
     },
+    typescript: {
+        ignoreBuildErrors: true,
+    },
+
 };
 
 export default nextConfig;

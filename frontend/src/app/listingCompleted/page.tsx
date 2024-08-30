@@ -4,8 +4,8 @@ import React, { useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import styles from './listing.module.css';
-import { useChat } from '@/store/use-chat-store';
 import { useEffect } from 'react';
+import { useChat } from "@/store/use-chat-store";
 
 export default function ListingComplete() {
     return (
