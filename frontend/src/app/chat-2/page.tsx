@@ -63,13 +63,15 @@ export default function ChatPage() {
 
   // APIからJSONを取ってきて、インターフェースの型に合わせて返す
   const sendChat = async (api: 'chat' | 'chat-start', formData: FormData): Promise<ChatResponseJSON> => {
-    const chatResponse: ChatResponse = await apiFetch(`/api/${api}`, {
-      method: 'POST',
-      body: formData
-    });
     try {
+      const chatResponse: ChatResponse = await apiFetch(`/api/${api}`, {
+        method: 'POST',
+        body: formData
+      });
+      console.log('chatResponse:', chatResponse);
       // priceがnumberになるようにJSONをパース
       const json = JSON.parse(chatResponse.response);
+      console.log('json:', json);
       return {
         question: json?.question,
         title: json?.title,
