@@ -31,13 +31,13 @@ export default function Home() {
 
   // データを取ってくる関数
   useEffect(() => {
-    return () => {
-      getProducts().then((data) => {
-        console.log('data:', data);
-        setTopsProducts(data);
-        console.log('topsProducts:', topsProducts);
-      });
-    };
+    // return () => {
+    getProducts().then((data) => {
+      console.log('data:', data);
+      setTopsProducts(data);
+      console.log('topsProducts:', topsProducts);
+    });
+    // };
   }, []);
 
   const getProducts = async (): Promise<ProductsJsonType[]> => {
