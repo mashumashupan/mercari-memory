@@ -1,12 +1,31 @@
 .container {
-    width: 100vw; /* ビューポート全体の幅 */
-    height: 100vh; /* ビューポート全体の高さ */
+    position: relative;
+    width: 100vw;
+    height: 100vh;
+}
+  
+.overlay {
+    position: absolute;
+    bottom: 100px;
+    left: 0;
+    z-index: 1000;
+    pointer-events: auto;
     display: flex;
     justify-content: center;
     align-items: center;
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-    overflow: hidden; /* これを追加して、はみ出しを隠します */
+    width: 100%; /* 親要素の幅を100%に */
+    height: 250px; /* 親要素の高さを設定 */
 }
-  
+
+
+.imageButton {
+    width: 250px; /* 画像の幅を500pxに設定 */
+    height: 250px; /* 画像の高さを500pxに設定 */
+    max-width: 100%; /* 画面幅を超えないように制限 */
+    max-height: 100%; /* 画面高さを超えないように制限 */
+    cursor: pointer; /* クリック時のカーソルを変更 */
+    object-fit: contain; /* 画像全体が表示されるように調整 */
+    background-color: transparent; /* 背景を透過に設定 */
+    padding: 0; /* 余白をなくす */
+}
+

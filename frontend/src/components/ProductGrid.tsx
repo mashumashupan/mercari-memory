@@ -16,7 +16,7 @@ export default function ProductGrid({ title, products }: ProductGridProps) {
                 {/* <h2 className="text-xl font-bold text-white">{title}</h2>
                 <a href="#" className="text-blue-400 hover:underline">See all</a> */}
             </div>
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
+            <div className="grid grid-cols-3 gap-4">
                 {products.map((product, index) => (
                     <div key={index} className="bg-blue-800 rounded-lg overflow-hidden">
                         <div className="aspect-w-1 aspect-h-1 relative">
