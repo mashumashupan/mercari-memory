@@ -19,13 +19,13 @@ export default function SellItemForm() { // ここにuseHistory
     const router = useRouter();
 
     useEffect(() => {
-        return () => {
-            // セッションストレージから画像データを取得
-            const imageSrc = sessionStorage.getItem('capturedImage');
-            if (imageSrc) {
-                setCapturedImage(imageSrc);
-            }
-        };
+        // return () => {
+        // セッションストレージから画像データを取得
+        const imageSrc = sessionStorage.getItem('capturedImage');
+        if (imageSrc) {
+            setCapturedImage(imageSrc);
+        }
+        // };
     }, []);
 
     const listing = async () => {
