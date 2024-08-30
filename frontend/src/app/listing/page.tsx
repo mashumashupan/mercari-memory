@@ -6,6 +6,9 @@ import Image from 'next/image';
 import styles from './listing.module.css';
 import { useChat } from '@/store/use-chat-store';
 import { useEffect } from 'react';
+import apiFetch from '@/utils/api';
+import { ProductsJsonType } from '@/app/page';
+import { useRouter } from 'next/navigation';
 
 export default function SellItemForm() { // ここにuseHistory 
     // const [title, setTitle] = useState<string>(''); // 画面に表示するコンポーネントを取り出す
@@ -13,6 +16,7 @@ export default function SellItemForm() { // ここにuseHistory
     // const [price, setPrice] = useState<string>('');
     const { title, description, price, setPrice } = useChat();
     const [capturedImage, setCapturedImage] = useState<string | null>(null);
+    const router = useRouter();
 
     useEffect(() => {
         return () => {
@@ -23,6 +27,23 @@ export default function SellItemForm() { // ここにuseHistory
             }
         };
     }, []);
+
+    const listing = async () => {
+        try {
+            const chatResponse = await apiFetch<ProductsJsonType>(`/api/create-product`, {
+                method: 'POST',
+                body: JSON.stringify({
+                    name: title,
+                    description: description,
+                    price: price,
+                    image: capturedImage
+                })
+            })
+            router.push('/listingCompleted');
+        } catch (error) {
+            console.error('Error parsing JSON:', error);
+        }
+    }
 
     return (
         <div className={styles['sell-item-form']}>
@@ -93,9 +114,10 @@ export default function SellItemForm() { // ここにuseHistory
                 </section>
 
                 <div className={styles['form-actions']}>
-                    <Link href="/listingCompleted">
-                        <button className={styles['list-button']}>List</button>
-                    </Link>
+                    {/* <Link href="/listingCompleted"> */}
+                    <button className={styles['list-button']} onClick={(e) => { listing() }}>
+                        List</button>
+                    {/* </Link> */}
                 </div>
             </div>
         </div>

@@ -12,7 +12,6 @@ interface User {
   name: string;
 }
 
-
 // ユーザー情報を読み込むカスタムフック
 const useUser = () => {
   const [user, setUser] = useState<User | undefined>(undefined);

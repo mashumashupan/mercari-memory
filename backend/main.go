@@ -29,8 +29,8 @@ type Products struct {
 	Id          uint    `gorm:"primaryKey"`
 	Name        string  `gorm:"type:varchar(255)"`
 	Price       float64 `gorm:"type:decimal(10,2)"`
-	Image       string  `gorm:"type:varchar(255)"`
-	Description string  `gorm:"type:varchar(255)"`
+	Image       string  `gorm:"type:longtext"`
+	Description string  `gorm:"type:text"`
 }
 
 // APIのリクエスト/レスポンス用
@@ -58,6 +58,7 @@ var systemMessage = openai.ChatCompletionMessage{
 	- ユーザーといくつかのやり取りをした後、ユーザーの回答を踏まえて商品説明となる物語感ある文章を作成する。
 	- 数値で値段を考えて。"""絶対に"""ドルの価格で適正な金額を考えて、単位を入れないで数値のみにして。
 	- 質問か最終出力以外のメッセージは"""絶対に"""不要．
+	- (important) コードブロックは禁止
 	- (important) あなたの全ての返答は必ずJSON形式にすること．フォーマットは以下の通りです．
 	  {
 		"question": "質問内容(最終出力では含めない)",
