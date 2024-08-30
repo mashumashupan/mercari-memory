@@ -93,7 +93,9 @@ export default function SellItemForm() { // ここにuseHistory
                 </section>
 
                 <div className={styles['form-actions']}>
-                    <button className={styles['list-button']}>List</button>
+                    <Link href="/listingCompleted">
+                        <button className={styles['list-button']}>List</button>
+                    </Link>
                 </div>
             </div>
         </div>
