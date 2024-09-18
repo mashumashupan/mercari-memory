@@ -140,6 +140,9 @@ func main() {
 		// 商品一覧取得API
 		v1.GET("/api/products", products)
 
+		//　商品詳細取得API
+		v1.GET("/api/product/:id", product)
+
 		// 商品登録API
 		v1.POST("/api/create-product", createProduct)
 
@@ -199,6 +202,36 @@ func products(c *gin.Context) {
 
 	// JSONを返す
 	c.JSON(200, productsJson)
+}
+
+// product godoc
+// @Summary 商品詳細取得API
+// @Description 商品詳細を取得するAPI
+// @ID get-product
+// @Param id path int true "商品ID"
+// @Produce json
+// @Success 200 {object} ProductsJson
+// @Router /api/product/{id} [get]
+func product(c *gin.Context) {
+
+	// 商品IDを取得
+	id := c.Param("id")
+
+	// データベースから商品情報を取得
+	product := Products{}
+	db.First(&product, id)
+
+	// 商品情報JSONに変換
+	productJson := ProductsJson{
+		Id:          product.Id,
+		Name:        product.Name,
+		Price:       product.Price,
+		Image:       product.Image,
+		Description: product.Description,
+	}
+
+	// 商品情報JSONを返す
+	c.JSON(200, productJson)
 }
 
 // createProduct godoc

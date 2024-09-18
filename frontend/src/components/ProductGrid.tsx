@@ -1,5 +1,7 @@
 import Image from 'next/image';
 import { ProductsJsonType } from '@/app/page';
+import { root } from 'postcss';
+import { useRouter } from 'next/navigation';
 
 interface ProductGridProps {
     title: string;
@@ -16,7 +18,12 @@ export default function ProductGrid({ title, products }: ProductGridProps) {
     //     { id: 5, name: 'Trader Joe\'s tote bag', price: 80.00, image: '/images/product5.jpg', description: 'The "Trader Joe\'s Tote Bag" is made from high-quality materials, making it a perfect everyday carryall. Despite its large capacity, it remains lightweight and easy to carry, making it ideal for shopping, picnics, or travel. Its versatility and durability make it a go-to accessory for any occasion.' },
     //     { id: 6, name: 'Stuffed Rabbit of Dylan\'s Candy Bar', price: 30.00, image: '/images/product6.jpg', description: 'The adorable "Stuffed Rabbit of Dylan\'s Candy Bar" is a plush toy loved by both children and adults. Made from soft materials, it’s perfect for cuddling and adds a charming touch to any bed or sofa. It\'s also a delightful gift choice, bringing joy and comfort to the recipient.' },
     // ];
+    const router = useRouter();
 
+    const handleClick = (product: ProductsJsonType) => {
+        // ここに遷移処理を書く
+        router.push(`/product/${product.id}`);
+    }
 
 
     // プロパティで渡された products を無視して、固定の商品データを使用
@@ -28,7 +35,7 @@ export default function ProductGrid({ title, products }: ProductGridProps) {
             </div>
             <div className="grid grid-cols-3 gap-4">
                 {products.map((product, index) => (
-                    <div key={index} className="bg-blue-800 rounded-lg overflow-hidden">
+                    <div key={index} className="bg-blue-800 rounded-lg overflow-hidden" onClick={() => handleClick(product)}>
                         <div className="aspect-w-1 aspect-h-1 relative">
                             <Image
                                 src={product.image ?? 'https://placehold.co/200x200/900C3F/31343C'}
