@@ -25,6 +25,10 @@ services:
       MYSQL_PASSWORD: password
     volumes:
       - db_data:/var/lib/mysql
+    networks:
+      - default
 
 volumes:
   db_data:
+networks:
+  default:
